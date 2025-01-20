@@ -110,7 +110,7 @@ fn main() {
     // cargo publish doesn't like pyc files.
     env::set_var("PYTHONDONTWRITEBYTECODE", "1");
 
-    build_v8(is_asan);
+    // build_v8(is_asan);
     build_binding();
 
     return;
@@ -151,7 +151,14 @@ fn build_binding() {
   let bindings = bindgen::Builder::default()
     .header("src/binding.hpp")
     .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-    .clang_args(["-x", "c++", "-std=c++20", "-Iv8/include", "-I."])
+    .clang_args([
+      "-x",
+      "c++",
+      "-std=c++20",
+      "--sysroot=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot",
+      "-Iv8/include",
+      "-I.",
+    ])
     .clang_args(args)
     .generate_cstr(true)
     .rustified_enum(".*UseCounterFeature")

@@ -12,7 +12,10 @@ image = "cross-rusty_v8:aarch64-linux-android"
 
 [target.aarch64-linux-android.env]
 passthrough = [
-    "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
+    "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++",
+    "CLANG_PATH=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++",
+    "LIBCLANG_PATH=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/lib",
+    "LIBCLANG_STATIC_PATH=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/lib"
 ]
 
 [target.x86_64-linux-android]
