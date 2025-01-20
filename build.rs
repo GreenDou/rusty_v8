@@ -110,7 +110,7 @@ fn main() {
     // cargo publish doesn't like pyc files.
     env::set_var("PYTHONDONTWRITEBYTECODE", "1");
 
-    build_v8(is_asan);
+    // build_v8(is_asan);
     build_binding();
 
     return;
