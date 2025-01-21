@@ -47,7 +47,8 @@ default_args = {
   # V8 allocates as MADV_DONTFORK. Without MADV_DONTFORK, the Linux kernel
   # spends a long time manipulating page mappings on fork and exec which the
   # child process doesn't generally need to access.
-  v8_enable_private_mapping_fork_optimization = true
+  # Linux 专用的 flag，对我们无用
+  v8_enable_private_mapping_fork_optimization = false
 
   # We prefer embedders to bring their own compression
   v8_use_zlib = false
@@ -69,6 +70,7 @@ default_args = {
   # isolates running at the same time must be created from the same snapshot.
   # This is problematic for Deno, which has separate "runtime" and "typescript
   # compiler" snapshots, and sometimes uses them both at the same time.
+  # 应该已经没用了
   v8_enable_shared_ro_heap = false
 
   # V8 11.6 hardcoded an assumption in `mksnapshot` that shared RO heap
