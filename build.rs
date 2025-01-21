@@ -150,7 +150,19 @@ fn build_binding() {
   let bindings = bindgen::Builder::default()
     .header("src/binding.hpp")
     .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-    .clang_args(["-x", "c++", "-std=c++20", "-Iv8/include", "-I."])
+    .clang_args([
+      "-x",
+      "c++",
+      "-std=c++20",
+      "--sysroot=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot",
+      "-Iv8/include",
+      "-I.",
+      // 添加以下编译器标志以解决模板特化问题
+      "-D_LIBCPP_ENABLE_EXPERIMENTAL",
+      "-D_LIBCPP_DISABLE_DEPRECATION_WARNINGS",
+      // 可能需要禁用一些严格的标准检查
+      "-fpermissive",
+    ])
     .clang_args(args)
     .generate_cstr(true)
     .rustified_enum(".*UseCounterFeature")
@@ -279,11 +291,18 @@ fn build_v8(is_asan: bool) {
 
     // NDK 23 and above removes libgcc entirely.
     // https://github.com/rust-lang/rust/pull/85806
-    if !Path::new("./third_party/android_ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang++").exists() {
+    // let target_arch =
+    //   env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
+    println!("cargo:rustc-link-search=./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/19/lib/linux/");
+    println!("cargo:rustc-link-lib=static=clang_rt.builtins-aarch64-android");
+    env::set_var("CLANG_PATH", "./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++");
+    env::set_var("LIBCLANG_PATH", "./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/lib");
+    env::set_var("LIBCLANG_STATIC_PATH", "./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/lib");
+    if !Path::new("./third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++").exists() {
         assert!(Command::new("curl")
         .arg("-L")
-        .arg("-o").arg("./third_party/android-ndk-r26c-linux.zip")
-        .arg("https://dl.google.com/android/repository/android-ndk-r26c-linux.zip")
+        .arg("-o").arg("./third_party/android-ndk-r28-linux.zip")
+        .arg("https://dl.google.com/android/repository/android-ndk-r28-linux.zip")
         .status()
         .unwrap()
         .success());
@@ -292,13 +311,15 @@ fn build_v8(is_asan: bool) {
         .arg("-d").arg("./third_party/")
         .arg("-o")
         .arg("-q")
-        .arg("./third_party/android-ndk-r26c-linux.zip")
+        .arg("./third_party/android-ndk-r28-linux.zip")
         .status()
         .unwrap()
         .success());
 
-        fs::rename("./third_party/android-ndk-r26c", "./third_party/android_ndk").unwrap();
-        fs::remove_file("./third_party/android-ndk-r26c-linux.zip").unwrap();
+        // new dir if not exist
+        fs::create_dir_all("./third_party/android_toolchain").unwrap();
+        fs::rename("./third_party/android-ndk-r28", "./third_party/android_toolchain/ndk").unwrap();
+        fs::remove_file("./third_party/android-ndk-r28-linux.zip").unwrap();
       }
     static CHROMIUM_URI: &str = "https://chromium.googlesource.com";
     maybe_clone_repo(
